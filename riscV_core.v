@@ -1,4 +1,4 @@
-`timescale 1ns/10ps
+`timescale 1ns/100ps
 
 `define CPU_BITS 32
 `define CPU_REGS 32
@@ -27,16 +27,16 @@
 `define SRA 9
 
 
-module clock (
+/*module clock (
     clk
 );
 
-output [0:0] clk;
-reg [0:0] clk;
+output clk;
+reg clk;
 
 always #10 clk=~clk;
 
-endmodule
+endmodule*/
 
 module pc_mux (
     reset,
@@ -330,7 +330,8 @@ module alu (
     alu_decode,
     idex_reg,
     rdx,
-    result
+    result,
+    zero
 );
 
 input reset;
@@ -339,6 +340,9 @@ input [152:0] idex_reg;
 input [31:0] rdx;
 output [31:0] result;
 reg [31:0] result;
+output zero;
+reg zero;
+
 
 always @(reset, alu_decode, idex_reg, rdx) begin: ALU_OPERATION
     if ((reset == 1)) begin
@@ -371,15 +375,20 @@ always @(reset, alu_decode, idex_reg, rdx) begin: ALU_OPERATION
                 result = (idex_reg[((3 * 5) + (3 * 32))-1:((3 * 5) + (2 * 32))] < rdx) ? 1'b1 : 1'b0;
             end
             'h9: begin
-                if ((idex_reg[((3 * 5) + (3 * 32))-1:((3 * 5) + (2 * 32))][31] == 0)) begin
+                if ((idex_reg[110] == 0)) begin
                     result = $signed($signed(idex_reg[((3 * 5) + (3 * 32))-1:((3 * 5) + (2 * 32))]) >>> rdx);
                 end
-                else if ((idex_reg[((3 * 5) + (3 * 32))-1:((3 * 5) + (2 * 32))][31] == 1)) begin
+                else if ((idex_reg[110] == 1)) begin
                     result = $signed($signed(idex_reg[((3 * 5) + (3 * 32))-1:((3 * 5) + (2 * 32))]) >>> rdx);
-                    result[32-1:(31 - $signed({1'b0, rdx}))] = ((2 ** rdx) - 1);
+                    
+                    result[32-1:0] = ((2 ** rdx) - 1); //**//
                 end
             end
         endcase
+        if (alu_decode == 0)
+            zero = 1'b1;
+        else
+            zero = 1'b0;
     end
 end
 
@@ -579,30 +588,30 @@ module data_mem (
     mem_rd, 
     rdb, 
     read_data
- );
+);
 
- input reset;
- input [0:0] clk;
- input [31:0] result;
- input [0:0] mem_wr;
- input [0:0] mem_rd;
- input [31:0] rdb;
- output [31:0] read_data;
- reg [31:0] read_data;
+input reset;
+input [0:0] clk;
+input [31:0] result;
+input [0:0] mem_wr;
+input [0:0] mem_rd;
+input [31:0] rdb;
+output [31:0] read_data;
+reg [31:0] read_data;
 
 
- integer k;
- wire [31:0] data_ram [0:128-1];
+integer k;
+reg [31:0] data_ram [0:128-1];
 
- initial 
-   begin 
-    $readmemb("mc_data", data_ram); 
-   end
+initial 
+begin 
+    $readmemb("D:/PROJECTS BTECH/risc_cpu/mc_data.txt", data_ram); 
+end
 
- always @(posedge clk, data_ram[0], data_ram[1], data_ram[2], data_ram[3], data_ram[4], data_ram[5], data_ram[6], data_ram[7], data_ram[8], data_ram[9], data_ram[10], data_ram[11], data_ram[12], data_ram[13], data_ram[14], data_ram[15], data_ram[16], data_ram[17], data_ram[18], data_ram[19], data_ram[20], data_ram[21], data_ram[22], data_ram[23], data_ram[24], data_ram[25], data_ram[26], data_ram[27], data_ram[28], data_ram[29], data_ram[30], data_ram[31], data_ram[32], data_ram[33], data_ram[34], data_ram[35], data_ram[36], data_ram[37], data_ram[38], data_ram[39], data_ram[40], data_ram[41], data_ram[42], data_ram[43], data_ram[44], data_ram[45], data_ram[46], data_ram[47], data_ram[48], data_ram[49], data_ram[50], data_ram[51], data_ram[52], data_ram[53], data_ram[54], data_ram[55], data_ram[56], data_ram[57], data_ram[58], data_ram[59], data_ram[60], data_ram[61], data_ram[62], data_ram[63], data_ram[64], data_ram[65], data_ram[66], data_ram[67], data_ram[68], data_ram[69], data_ram[70], data_ram[71], data_ram[72], data_ram[73], data_ram[74], data_ram[75], data_ram[76], data_ram[77], data_ram[78], data_ram[79], data_ram[80], data_ram[81], data_ram[82], data_ram[83], data_ram[84], data_ram[85], data_ram[86], data_ram[87], data_ram[88], data_ram[89], data_ram[90], data_ram[91], data_ram[92], data_ram[93], data_ram[94], data_ram[95], data_ram[96], data_ram[97], data_ram[98], data_ram[99], data_ram[100], data_ram[101], data_ram[102], data_ram[103], data_ram[104], data_ram[105], data_ram[106], data_ram[107], data_ram[108], data_ram[109], data_ram[110], data_ram[111], data_ram[112], data_ram[113], data_ram[114], data_ram[115], data_ram[116], data_ram[117], data_ram[118], data_ram[119], data_ram[120], data_ram[121], data_ram[122], data_ram[123], data_ram[124], data_ram[125], data_ram[126], data_ram[127])
- begin: DATA_MEM_DTCM
-  if ((reset == 1)) 
-  begin
+always @(posedge clk)/*, data_ram[0], data_ram[1], data_ram[2], data_ram[3], data_ram[4], data_ram[5], data_ram[6], data_ram[7], data_ram[8], data_ram[9], data_ram[10], data_ram[11], data_ram[12], data_ram[13], data_ram[14], data_ram[15], data_ram[16], data_ram[17], data_ram[18], data_ram[19], data_ram[20], data_ram[21], data_ram[22], data_ram[23], data_ram[24], data_ram[25], data_ram[26], data_ram[27], data_ram[28], data_ram[29], data_ram[30], data_ram[31], data_ram[32], data_ram[33], data_ram[34], data_ram[35], data_ram[36], data_ram[37], data_ram[38], data_ram[39], data_ram[40], data_ram[41], data_ram[42], data_ram[43], data_ram[44], data_ram[45], data_ram[46], data_ram[47], data_ram[48], data_ram[49], data_ram[50], data_ram[51], data_ram[52], data_ram[53], data_ram[54], data_ram[55], data_ram[56], data_ram[57], data_ram[58], data_ram[59], data_ram[60], data_ram[61], data_ram[62], data_ram[63], data_ram[64], data_ram[65], data_ram[66], data_ram[67], data_ram[68], data_ram[69], data_ram[70], data_ram[71], data_ram[72], data_ram[73], data_ram[74], data_ram[75], data_ram[76], data_ram[77], data_ram[78], data_ram[79], data_ram[80], data_ram[81], data_ram[82], data_ram[83], data_ram[84], data_ram[85], data_ram[86], data_ram[87], data_ram[88], data_ram[89], data_ram[90], data_ram[91], data_ram[92], data_ram[93], data_ram[94], data_ram[95], data_ram[96], data_ram[97], data_ram[98], data_ram[99], data_ram[100], data_ram[101], data_ram[102], data_ram[103], data_ram[104], data_ram[105], data_ram[106], data_ram[107], data_ram[108], data_ram[109], data_ram[110], data_ram[111], data_ram[112], data_ram[113], data_ram[114], data_ram[115], data_ram[116], data_ram[117], data_ram[118], data_ram[119], data_ram[120], data_ram[121], data_ram[122], data_ram[123], data_ram[124], data_ram[125], data_ram[126], data_ram[127]*/
+begin: DATA_MEM_DTCM
+if ((reset == 1)) 
+begin
     if((mem_wr))
     begin
         
@@ -613,8 +622,8 @@ module data_mem (
         k= data_ram[result];
         read_data=k; 
     end
-  end
- end
+end
+end
 endmodule
 
 module inst_mem (
@@ -629,17 +638,17 @@ input [31:0] read_addr;
 output [31:0] instruction;
 reg [31:0] instruction;
 
-wire [31:0] inst_ram [0:128-1];
+reg [31:0] inst_ram [0:128-1];
 
 integer j; 
- 
+
 initial 
-  begin 
-    $readmemb("mc_code", inst_ram); 
-  end
+begin 
+    $readmemb("D:/PROJECTS BTECH/risc_cpu/mc_code.txt", inst_ram); 
+end
 
 
-always @(reset, read_addr, inst_ram[0], inst_ram[1], inst_ram[2], inst_ram[3], inst_ram[4], inst_ram[5], inst_ram[6], inst_ram[7], inst_ram[8], inst_ram[9], inst_ram[10], inst_ram[11], inst_ram[12], inst_ram[13], inst_ram[14], inst_ram[15], inst_ram[16], inst_ram[17], inst_ram[18], inst_ram[19], inst_ram[20], inst_ram[21], inst_ram[22], inst_ram[23], inst_ram[24], inst_ram[25], inst_ram[26], inst_ram[27], inst_ram[28], inst_ram[29], inst_ram[30], inst_ram[31], inst_ram[32], inst_ram[33], inst_ram[34], inst_ram[35], inst_ram[36], inst_ram[37], inst_ram[38], inst_ram[39], inst_ram[40], inst_ram[41], inst_ram[42], inst_ram[43], inst_ram[44], inst_ram[45], inst_ram[46], inst_ram[47], inst_ram[48], inst_ram[49], inst_ram[50], inst_ram[51], inst_ram[52], inst_ram[53], inst_ram[54], inst_ram[55], inst_ram[56], inst_ram[57], inst_ram[58], inst_ram[59], inst_ram[60], inst_ram[61], inst_ram[62], inst_ram[63], inst_ram[64], inst_ram[65], inst_ram[66], inst_ram[67], inst_ram[68], inst_ram[69], inst_ram[70], inst_ram[71], inst_ram[72], inst_ram[73], inst_ram[74], inst_ram[75], inst_ram[76], inst_ram[77], inst_ram[78], inst_ram[79], inst_ram[80], inst_ram[81], inst_ram[82], inst_ram[83], inst_ram[84], inst_ram[85], inst_ram[86], inst_ram[87], inst_ram[88], inst_ram[89], inst_ram[90], inst_ram[91], inst_ram[92], inst_ram[93], inst_ram[94], inst_ram[95], inst_ram[96], inst_ram[97], inst_ram[98], inst_ram[99], inst_ram[100], inst_ram[101], inst_ram[102], inst_ram[103], inst_ram[104], inst_ram[105], inst_ram[106], inst_ram[107], inst_ram[108], inst_ram[109], inst_ram[110], inst_ram[111], inst_ram[112], inst_ram[113], inst_ram[114], inst_ram[115], inst_ram[116], inst_ram[117], inst_ram[118], inst_ram[119], inst_ram[120], inst_ram[121], inst_ram[122], inst_ram[123], inst_ram[124], inst_ram[125], inst_ram[126], inst_ram[127])
+always @(reset, read_addr)/* inst_ram[0], inst_ram[1], inst_ram[2], inst_ram[3], inst_ram[4], inst_ram[5], inst_ram[6], inst_ram[7], inst_ram[8], inst_ram[9], inst_ram[10], inst_ram[11], inst_ram[12], inst_ram[13], inst_ram[14], inst_ram[15], inst_ram[16], inst_ram[17], inst_ram[18], inst_ram[19], inst_ram[20], inst_ram[21], inst_ram[22], inst_ram[23], inst_ram[24], inst_ram[25], inst_ram[26], inst_ram[27], inst_ram[28], inst_ram[29], inst_ram[30], inst_ram[31], inst_ram[32], inst_ram[33], inst_ram[34], inst_ram[35], inst_ram[36], inst_ram[37], inst_ram[38], inst_ram[39], inst_ram[40], inst_ram[41], inst_ram[42], inst_ram[43], inst_ram[44], inst_ram[45], inst_ram[46], inst_ram[47], inst_ram[48], inst_ram[49], inst_ram[50], inst_ram[51], inst_ram[52], inst_ram[53], inst_ram[54], inst_ram[55], inst_ram[56], inst_ram[57], inst_ram[58], inst_ram[59], inst_ram[60], inst_ram[61], inst_ram[62], inst_ram[63], inst_ram[64], inst_ram[65], inst_ram[66], inst_ram[67], inst_ram[68], inst_ram[69], inst_ram[70], inst_ram[71], inst_ram[72], inst_ram[73], inst_ram[74], inst_ram[75], inst_ram[76], inst_ram[77], inst_ram[78], inst_ram[79], inst_ram[80], inst_ram[81], inst_ram[82], inst_ram[83], inst_ram[84], inst_ram[85], inst_ram[86], inst_ram[87], inst_ram[88], inst_ram[89], inst_ram[90], inst_ram[91], inst_ram[92], inst_ram[93], inst_ram[94], inst_ram[95], inst_ram[96], inst_ram[97], inst_ram[98], inst_ram[99], inst_ram[100], inst_ram[101], inst_ram[102], inst_ram[103], inst_ram[104], inst_ram[105], inst_ram[106], inst_ram[107], inst_ram[108], inst_ram[109], inst_ram[110], inst_ram[111], inst_ram[112], inst_ram[113], inst_ram[114], inst_ram[115], inst_ram[116], inst_ram[117], inst_ram[118], inst_ram[119], inst_ram[120], inst_ram[121], inst_ram[122], inst_ram[123], inst_ram[124], inst_ram[125], inst_ram[126], inst_ram[127])*/
 begin: INST_MEM_ITCM
     if ((reset == 1)) 
     begin
@@ -714,70 +723,104 @@ endmodule
 
 module cpu_top (
     clk,
-    reset
- );
+    reset,
+    zero
+);
 
- input [0:0] clk;
- input reset;
+input clk;
+input reset;
+output zero;
 
- reg [0:0] step;
+reg z;
+reg [0:0] step;
+wire [4:0] ra;
+wire [4:0] rb;
+wire [4:0] wa;
+wire [6:0] opcode;
+wire [31:0] wda;
+wire [31:0] rda;
+wire [31:0] rdb;
+wire [31:0] rdx;
+wire [3:0] alu_op;
+wire [3:0] alu_decode;
+wire [0:0] brnch;
+wire [0:0] mem_rd;
+wire [0:0] mem_to_rgs;
+wire [0:0] mem_wr;
+wire [0:0] alu_src;
+wire [0:0] reg_wr;
+wire  [0:0] pc_sel;
+wire [31:0] result;
+wire [31:0] read_data;
+wire [31:0] pc;
+wire [31:0] shl;
+wire [31:0] im_gen;
+wire [31:0] read_addr;
+wire [31:0] instruction;
+wire [31:0] pc_addr;
+wire [31:0] jmp_addr;
 
- initial begin
-  ra<={5{1'b0}};
-  rb<={5{1'b0}};
-  wa<={5{1'b0}};
-  opcode <= {7{1'b0}};
-  wda<= {32{1'b0}};
-  rda<= {32{1'b0}};
-  rdb<= {32{1'b0}};
-  rdx<= {32{1'b0}};
-  alu_op<= {4{1'b0}};
-  brnch<=1'b0;
-  mem_rd<=1'b0;
-  mem_to_rgs<=1'b0;
-  mem_wr<=1'b0;
-  alu_src<=1'b0;
-  reg_wr <=1'b0;
-  step <= 1'b0;
-  pc_sel <=1'b0;
-  result<={32{1'b0}};
-  read_data<= {32{1'b0}};
-  pc<= {32{1'b0}};
-  shl <= {32{1'b0}};
-  im_gen <= {32{1'b0}};
-  alu_decode <= {4{1'b0}};
-  read_addr<= {32{1'b0}};
-  instruction <= {32{1'b0}};
-  pc_addr <= {32{1'b0}};
-  jmp_addr <= {32{1'b0}};
- end
- control cont(reset, opcode, brnch, mem_rd, mem_to_rgs, alu_op, mem_wr, alu_src, reg_wr);
- data_mem dmem(reset, clk, result, mem_wr, mem_rd, rdb, read_data);
- inst_mem imem(reset, read_addr, instruction);
- alu alux(reset, alu_decode, rda, rdx, result);
- reg_file regf(reset, clk, ra, rb, wa, wda, reg_wr, rda, rdb);
- pc_adder padr(reset, step, pc, pc_addr);
- jmp_adder jadr(reset, read_addr, shl, jmp_addr);
- pc_mux pcmx(reset, pc, pc_addr, jmp_addr, pc_sel);
- alu_mux almx(reset, im_gen, rdb, rdx, alu_src);
- wda_mux wdmx(reset, wda, mem_to_rgs, result, read_data);
- alu_control aluc(reset, instruction, alu_op, alu_decode);
- imm_gen imgn(reset, instruction, im_gen);
- pc_assign nxpc(reset, read_addr, pc);
- taken tken(result, brnch, pc_sel);
- decode decd(reset, ifid_reg, ra, rb, wa, opcode);
- idex_pipl idxp(reset, idex_reg, instruction, ra, rb, wa, im_gen, rda, rdb, alu_op, brnch, mem_rd, mem_to_rgs, mem_wr, alu_src, reg_wr);
- ifid_pipl ifdp(reset, ifid_reg, instruction, pc);
+initial begin
+z = 0;
+step = 1'b0;
 
- always @(posedge step)
- begin: CPU_TOP_CPU
-    if ((pc == 1)) 
+end
+
+assign ra= {5{1'b0}};
+assign rb={5{1'b0}};
+assign wa={5{1'b0}};
+assign opcode = {7{1'b0}};
+assign wda= {32{1'b0}};
+assign rda= {32{1'b0}};
+assign rdb= {32{1'b0}};
+assign rdx= {32{1'b0}};
+assign alu_op= {4{1'b0}};
+assign brnch = 1'b0 ;
+assign mem_rd=1'b0;
+assign mem_to_rgs=1'b0;
+assign mem_wr=1'b0;
+assign alu_src=1'b0;
+assign reg_wr =1'b0;
+assign pc_sel =1'b0;
+assign pc= {32{1'b0}};
+assign result={32{1'b0}};
+assign read_data= {32{1'b0}};
+assign shl = {32{1'b0}};
+assign im_gen = {32{1'b0}};
+assign alu_decode = {4{1'b0}};
+assign read_addr= {32{1'b0}};
+assign instruction = {32{1'b0}};
+assign pc_addr = {32{1'b0}};
+assign jmp_addr = {32{1'b0}};
+
+control cont(reset, opcode, brnch, mem_rd, mem_to_rgs, alu_op, mem_wr, alu_src, reg_wr);
+data_mem dmem(reset, clk, result, mem_wr, mem_rd, rdb, read_data);
+inst_mem imem(reset, read_addr, instruction);
+alu alux(reset, alu_decode, idex_reg, rdx, result, zero);
+reg_file regf(reset, clk, ra, rb, wa, wda, reg_wr, rda, rdb);
+pc_adder padr(reset, step, pc, pc_addr);
+jmp_adder jadr(reset, read_addr, shl, jmp_addr);
+pc_mux pcmx(reset, pc, pc_addr, jmp_addr, pc_sel);
+alu_mux almx(reset, im_gen, rdb, rdx, alu_src);
+wda_mux wdmx(reset, wda, mem_to_rgs, result, read_data);
+alu_control aluc(reset, instruction, alu_op, alu_decode);
+imm_gen imgn(reset, instruction, im_gen);
+pc_assign nxpc(reset, read_addr, pc);
+taken tken(result, brnch, pc_sel);
+decode decd(reset, ifid_reg, ra, rb, wa, opcode);
+idex_pipl idxp(reset, idex_reg, instruction, ra, rb, wa, im_gen, rda, rdb, alu_op, brnch, mem_rd, mem_to_rgs, mem_wr, alu_src, reg_wr);
+ifid_pipl ifdp(reset, ifid_reg, instruction, pc);
+
+/*
+always @(posedge step)
+begin: CPU_TOP_CPU
+    if ((pc == 0)) 
     begin
-        pc<=pc+1;
+        pc = 1;
     end
- end
+end*/
 
- initial begin: CPU_TOP_EVENT
+initial begin: CPU_TOP_EVENT
     integer idle;
     integer i;
     idle = 7;
@@ -790,6 +833,6 @@ module cpu_top (
             idle = 3;
         end
     end
- end
+end
 
 endmodule
