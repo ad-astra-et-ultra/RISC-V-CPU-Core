@@ -371,6 +371,12 @@ module data_mem(
         $readmemb("D:/PROJECTS BTECH/risc_cpu/mc_data.txt", data_ram);
     end
 
+    always @(reset) begin
+      if (reset == 1) begin
+        read_data<=0;
+      end
+    end
+
     always @(posedge clk, reset) begin
         if (reset == 1) begin
           read_data<=0;
@@ -400,7 +406,7 @@ module inst_mem(
   reg [`CPU_BITS-1:0] inst_ram [0:1048576-1];
   
 
-  // integer i;
+
   initial begin
     
     $readmemb("D:/PROJECTS BTECH/risc_cpu/mc_code.txt", inst_ram);
@@ -517,12 +523,13 @@ input wire reset
 
   wire [`CPU_BITS-1:0] read_addr, instruction, pc_addr, jmp_addr;
 
-
- 
     initial begin
+
       step <= 0;
     end
     
+    
+  
   control cont(reset, opcode, brnch, mem_rd, mem_to_rgs, alu_op, mem_wr, alu_src, reg_wr);
   data_mem dmem(reset, clk, result, mem_wr, mem_rd, rdb, read_data);
   inst_mem imem(reset, read_addr, instruction, ra, rb, wa, opcode);
@@ -539,6 +546,7 @@ input wire reset
   taken tken(result, brnch, pc_sel);
 
 
+
   always @(posedge clk)
   begin
   if (reset == 0)
@@ -548,5 +556,4 @@ input wire reset
   end
 
 endmodule
-
 
