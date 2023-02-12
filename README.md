@@ -10,7 +10,7 @@ RISC-V is an open source Instruction Set Architecture (ISA). In this project I h
 
 ![Screenshot (78)](https://user-images.githubusercontent.com/92263062/218331778-5caa5d43-26af-435a-b390-db5147717585.png)
 
-## Datapath without bundeled nets
+## Datapath without bundled nets
 
 ![Screenshot (79)](https://user-images.githubusercontent.com/92263062/218331831-a7b7f17e-4958-4c7a-8848-e0fb3ac1d40f.png)
 
