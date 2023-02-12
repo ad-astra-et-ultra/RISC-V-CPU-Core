@@ -4,7 +4,8 @@ A single cycle MIPS RISC-V CPU Core using Verilog
 ## Abstract
 RISC-V is an open source Instruction Set Architecture (ISA). In this project I have implemented a 32-bit, RISC-V ISA based processor in verilog and verified execution of 12 out of 47 instructions in RISC-V ISA. The sub-modules that are used and their interaction with each other are shown in the following picture.
 
-![image](https://user-images.githubusercontent.com/92263062/187923088-dd869f01-96b9-487c-8efa-2fe1e3105941.png)
+![Screenshot (82)](https://user-images.githubusercontent.com/92263062/218332253-1fdd301b-46d5-49ff-b189-aa46b0f897f3.png)
+
 
 ## Final datapath in Xilinx Vivado
 
