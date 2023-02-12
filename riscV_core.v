@@ -377,7 +377,7 @@ module data_mem(
       end
     end
 
-    always @(posedge clk, reset) begin
+    always @(posedge clk) begin
         if (reset == 1) begin
           read_data<=0;
         end
@@ -530,6 +530,7 @@ input wire reset
     
     
   
+
   control cont(reset, opcode, brnch, mem_rd, mem_to_rgs, alu_op, mem_wr, alu_src, reg_wr);
   data_mem dmem(reset, clk, result, mem_wr, mem_rd, rdb, read_data);
   inst_mem imem(reset, read_addr, instruction, ra, rb, wa, opcode);
