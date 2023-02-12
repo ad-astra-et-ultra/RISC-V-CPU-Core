@@ -1,34 +1,18 @@
-`include "riscV_core.v"
+module top();
+  reg clk;
+  reg reset;
+  initial begin
+    reset<=1;
+    clk<=0;
+  end
+  always #10 clk <= ~clk;
 
-module top ();
+  cpu_top cpu_inst(.clk(clk), .reset(reset));
+    initial begin
+    #1 reset = ~reset;
+    end
 
-reg clk;
-reg reset;
-wire zero;
-
-initial begin
-   reset = 0;
-   
-end
-
-initial begin
-   clk = 0;
-   forever #10 clk = ~clk;
-end
-/*clock cl (clk);*/
-cpu_top cpu(clk, reset, zero);
-
-initial begin
-$dumpfile("output_wave.vcd");
-$dumpvars(0,top);
-end
-
-initial begin: TOP_STIMULUS
-reset=0;
-@(negedge clk);
-reset=1;
-end
-
-initial
-   #1400 $finish;
+  initial
+   #60000 $finish;
+  
 endmodule
