@@ -8,13 +8,18 @@ RISC-V is an open source Instruction Set Architecture (ISA). In this project I h
 
 ## Final datapath in Xilinx Vivado
 
-![image](https://user-images.githubusercontent.com/92263062/187929152-0fbb3561-bdcf-4bd4-bd38-4d74bae0517b.png)
+![Screenshot (78)](https://user-images.githubusercontent.com/92263062/218331778-5caa5d43-26af-435a-b390-db5147717585.png)
+
+## Datapath without bundeled nets
+
+![Screenshot (79)](https://user-images.githubusercontent.com/92263062/218331831-a7b7f17e-4958-4c7a-8848-e0fb3ac1d40f.png)
 
 ## Output waveforms in Xilinx Vivado
 
-![image](https://user-images.githubusercontent.com/92263062/187931710-64d40f78-a37f-434d-8cfc-478090433c2f.png)
+![Screenshot (80)](https://user-images.githubusercontent.com/92263062/218332071-14bfbf8f-b7d3-4321-b199-736d8133a027.png)
 
-![image](https://user-images.githubusercontent.com/92263062/187931840-99db71bf-5e2d-41e4-8063-a1f870ef9b43.png)
+![Screenshot (81)](https://user-images.githubusercontent.com/92263062/218332077-053d4ded-9998-4996-be95-e41075de027c.png)
+
 
 ## Synthesized design of the processor in Xilinx Vivado
 
